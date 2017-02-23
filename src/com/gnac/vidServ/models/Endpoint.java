@@ -16,6 +16,10 @@ public class Endpoint {
 
     }
 
+    public Endpoint(int endPointID) {
+        id=endPointID;
+    }
+
     public void setlatency(Cache cache, int latency){
 
         latencyTable.put(cache, new Integer(latency));
