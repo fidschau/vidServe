@@ -33,6 +33,8 @@ public class Endpoint {
     }
 
     public  ArrayList<RequestDescription> getRequestDescriptions(){
+        Collections.sort(requestDescriptions, (o1, o2) -> o2.getViewers()-o1.getViewers());
+
         return requestDescriptions;
     }
 
