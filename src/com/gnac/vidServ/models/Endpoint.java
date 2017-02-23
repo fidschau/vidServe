@@ -1,7 +1,6 @@
 package com.gnac.vidServ.models;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * Created by fidelity on 2017/02/23.
@@ -20,6 +19,8 @@ public class Endpoint {
     public void setlatency(Cache cache, int latency){
 
         latencyTable.put(cache, new Integer(latency));
+        latencyTable=getSortedCachesByLatency();
+
     }
     public int getLatency(Cache cache){
 
@@ -48,6 +49,19 @@ public class Endpoint {
     @Override
     public int hashCode() {
         return id;
+    }
+
+    public HashMap<Cache,Integer> getSortedCachesByLatency(){
+        List<HashMap.Entry<Cache,Integer>> entryList= new LinkedList<Map.Entry<Cache, Integer>>(latencyTable.entrySet());
+
+        Collections.sort(entryList, Comparator.comparing(o -> (o.getValue())));
+
+        HashMap<Cache,Integer>  returnHashMap=new HashMap<>();
+        for (Map.Entry<Cache,Integer> cacheIntegerEntry:entryList){
+            returnHashMap.put(cacheIntegerEntry.getKey(),cacheIntegerEntry.getValue());
+        }
+
+        return returnHashMap;
     }
 
 
