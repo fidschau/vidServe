@@ -5,12 +5,12 @@ import com.gnac.vidServ.models.Endpoint;
 import com.gnac.vidServ.models.RequestDescription;
 import com.gnac.vidServ.models.Video;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Files;
+import java.util.*;
 
 
 import java.io.*;
-import java.util.StringJoiner;
+import java.util.stream.Stream;
 
 /**
  * Created by fidelity on 2017/02/23.
@@ -47,9 +47,19 @@ public class Main {
     public static void main(String[] args) {
         // write your code here
         String[][] rawArray= getRawArrayFromFile("me_at_the_zoo.in");
-        System.out.println(rawArray[0][3]);
+        System.out.println(rawArray[0][0]);
 
-        /*ArrayList<Video>videos=new ArrayList<>();
+       /* try {
+            int [][] testArray=create2DIntMatrixFromFile("me_at_the_zoo.in");
+
+
+            System.out.println(""+testArray[0][0]);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
+        ArrayList<Video>videos=new ArrayList<>();
         ArrayList<Endpoint>endpoints=new ArrayList<>();
         if (rawArray!=null){
             String[] description=rawArray[0];
@@ -65,8 +75,9 @@ public class Main {
             int numberOfEndpoints=Integer.parseInt(description[1]);
             //endpoints= new Endpoint[numberOfEndpoints];
 
-            int lineCount=2;
+            int lineCount=1;
             for (int i=0;i<numberOfEndpoints;i++){
+                lineCount++;
                 String[] endpointDescription =rawArray[lineCount];
 
                 int dataCenterLatency=Integer.parseInt(endpointDescription[0]);
@@ -95,9 +106,13 @@ public class Main {
                 endpoints.get(endpoints.indexOf(endpoint)).addRequestDescription(requestDescription);
                 lineCount++;
             }
+            System.out.println(videos.toString());
+            System.out.println(endpoints.toString());
+            Collections.sort(endpoints, (o1, o2) -> Float.compare(o2.getAverageVideoDemand(),o1.getAverageVideoDemand()));
+            System.out.println("Sorted: "+endpoints.toString());
 
         }
-        else System.out.println("raw array is null");*/
+        else System.out.println("raw array is null");
     }
 
 
@@ -110,20 +125,22 @@ public class Main {
             String path="./input_files/";
             File inputFile = new File(path, fileName);
             BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-            String[] imageLine = reader.readLine().split("");
-            int row = Integer.parseInt(imageLine[0]);
-            int column = Integer.parseInt(imageLine[1]);
 
-            String[][] image = new String[row][column];
-            while (count < column) {
-                String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
+            ArrayList<String []> strings= new ArrayList<>();
+
+            String[][] image;// = new String[row][column];
+
+
+            String line;
+
+            while ((line = reader.readLine())!=null) {
+
                 String[] temp = line.split(" ");
-                image[count] = temp;
-                count++;
+                strings.add(temp);
             }
+            image=new String[strings.size()][];
+            image=strings.toArray(image);
+
             return image;
         }catch (Exception e){
             e.printStackTrace();
@@ -158,4 +175,44 @@ public class Main {
 
         }
     }
+
+
+    public static int[][] create2DIntMatrixFromFile(String filename) throws Exception {
+        int[][] matrix = null;
+
+        String path="./input_files/";
+        File inputFile = new File(path, filename);
+
+        // If included in an Eclipse project.
+       // InputStream stream = ClassLoader.getSystemResourceAsStream(inputFile.getPath());
+       // BufferedReader buffer = new BufferedReader(new InputStreamReader(stream));
+
+        // If in the same directory - Probably in your case...
+        // Just comment out the 2 lines above this and uncomment the line
+        // that follows.
+        BufferedReader buffer = new BufferedReader(new FileReader(inputFile));
+
+        String line;
+        int row = 0;
+        int size = 0;
+
+        while ((line = buffer.readLine()) != null) {
+            String[] vals = line.trim().split("\\s+");
+
+            // Lazy instantiation.
+            if (matrix == null) {
+                size = vals.length;
+                matrix = new int[size][size];
+            }
+
+            for (int col = 0; col < size; col++) {
+                matrix[row][col] = Integer.parseInt(vals[col]);
+            }
+
+            row++;
+        }
+
+        return matrix;
+    }
+
 }

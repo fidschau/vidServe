@@ -10,6 +10,7 @@ public class Endpoint {
     private HashMap<Cache,Integer> latencyTable = new HashMap<>();
     private ArrayList<RequestDescription> requestDescriptions=new ArrayList<>();
 
+
     public Endpoint(int id, int latencyToDataCenter) {
         this.id = id;
         this.latencyToDataCenter = latencyToDataCenter;
@@ -70,14 +71,43 @@ public class Endpoint {
         return returnHashMap;
     }
 
+    public float getAverageVideoDemand(){
+        int totalViews=0;
+        for (RequestDescription requestDescription:requestDescriptions){
+            totalViews+=requestDescription.getViewers();
+        }
+
+
+        return (totalViews/requestDescriptions.size());
+    }
+
+    public boolean isVideoInAnyCache(Video video){
+        for (Cache cache:getCaches()){
+          //  if (cache.)
+        }
+
+
+        return false;
+    }
+
+    private ArrayList<Cache> getCaches(){
+        ArrayList<Cache> caches= new ArrayList<>();
+       for (Cache cache:latencyTable.keySet()){
+           caches.add(cache);
+       }
+
+        return caches;
+    }
+
 
     @Override
     public String toString() {
         return "Endpoint{" +
                 "id=" + id +
                 ", latencyToDataCenter=" + latencyToDataCenter +
-                ", latencyTable=" + latencyTable +
+                ", latencyTable=" + latencyTable.toString() +
                 ", requestDescriptions=" + requestDescriptions +
+                ", average video demand= "+getAverageVideoDemand()+
                 '}';
     }
 }
