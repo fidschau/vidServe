@@ -37,6 +37,9 @@ public class Main {
     List<int[]> endpoint_video_requests = new ArrayList<int[]>();
 
 
+
+
+
     public void readInputFile(){
       //assign classes and variables from input
         no_of_videos = 5;
@@ -45,9 +48,21 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        // write your code here
-        String[][] rawArray= getRawArrayFromFile("me_at_the_zoo.in");
+        processVideos("me_at_the_zoo");
+
+        processVideos("trending_today");
+        processVideos("videos_worth_spreading");
+        processVideos("kittens");
+
+    }
+
+
+    private static void processVideos(String fileName){
+
+
+        String[][] rawArray= getRawArrayFromFile(fileName);
         System.out.println(rawArray[0][0]);
+        ArrayList<Cache>allCaches=new ArrayList<>();
 
        /* try {
             int [][] testArray=create2DIntMatrixFromFile("me_at_the_zoo.in");
@@ -67,6 +82,12 @@ public class Main {
             int maxCacheSize = Integer.parseInt(description[4]);
             int numberOfVideos=Integer.parseInt(description[0]);
             int numberOfRequests=Integer.parseInt(description[2]);
+            int totalNumberOfCaches=Integer.parseInt(description[3]);
+
+
+            for (int i=0;i<totalNumberOfCaches;i++){
+                allCaches.add(new Cache(i,maxCacheSize));
+            }
 
             for(int id=0;id<numberOfVideos;id++){
                 int size=Integer.parseInt(videoSizes[id]);
@@ -111,8 +132,57 @@ public class Main {
             Collections.sort(endpoints, (o1, o2) -> Float.compare(o2.getAverageVideoDemand(),o1.getAverageVideoDemand()));
             System.out.println("Sorted: "+endpoints.toString());
 
+
+
+            for (Endpoint endpoint:endpoints){
+                for (RequestDescription requestDescription:endpoint.getRequestDescriptions()){
+                    Video video = videos.get(videos.indexOf(requestDescription.getVideo()));
+                    if (!endpoint.isVideoInAnyCache(video,allCaches)){
+                        for (Cache cache:endpoint.getSortedCachesByLatency().keySet()){
+                            Cache globalCache=allCaches.get(allCaches.indexOf(cache));
+                            if (globalCache.addVideo(video)){
+                                allCaches.remove(cache);
+                                allCaches.add(cache);
+                                return;
+                            }
+                        }
+                    }
+                }
+
+            }
+
+            String submissionString = createSubmissionString(allCaches);
+            createSubmissionFile(fileName,submissionString);
+
         }
+
+
         else System.out.println("raw array is null");
+
+
+
+
+    }
+
+    private static String createSubmissionString(ArrayList<Cache> allCaches){
+        int totalCaches=0;
+        for (Cache cache:allCaches){
+            if (cache.isInUse())totalCaches++;
+        }
+        System.out.println("Total caches = "+totalCaches);
+
+        StringBuilder stringBuilder= new StringBuilder();
+        stringBuilder.append(totalCaches);
+        for (Cache cache:allCaches){
+
+            if (cache.isInUse()){
+
+                stringBuilder.append(cache.stringForSubmission());
+            }
+        }
+
+
+        return stringBuilder.toString();
     }
 
 
@@ -122,8 +192,10 @@ public class Main {
     public static String[][] getRawArrayFromFile(String fileName){
         try {
             int count = 0;
+
+            StringBuilder inputStringBuilder=new StringBuilder().append(fileName).append(".in");
             String path="./input_files/";
-            File inputFile = new File(path, fileName);
+            File inputFile = new File(path, inputStringBuilder.toString());
             BufferedReader reader = new BufferedReader(new FileReader(inputFile));
 
             ArrayList<String []> strings= new ArrayList<>();

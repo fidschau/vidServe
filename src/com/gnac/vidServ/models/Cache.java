@@ -19,11 +19,13 @@ public class Cache {
         this.size = size;
     }
 
-    public void addVideo(Video video){
+    public boolean addVideo(Video video){
         if (canAddVideo(video)){
             if (videos.contains(video))videos.remove(video);
             videos.add(video);
+            return true;
         }
+        return false;
     }
 
     public  boolean canAddVideo(Video video){
@@ -44,6 +46,16 @@ public class Cache {
         return size-usedUpSpace();
     }
 
+    public boolean hasVideo(Video video){
+
+        if (videos.contains(video))return true;
+        return false;
+    }
+
+    public int getNumberOfVideos(){
+        return videos.size();
+    }
+
     public String stringForSubmission(){
         StringBuilder stringBuilder= new StringBuilder();
         if (videos.size()>0){
@@ -54,5 +66,34 @@ public class Cache {
             stringBuilder.append(" ").append(video.getId());
         }
         return stringBuilder.toString();
+    }
+
+    public boolean isInUse(){
+
+        return videos.size()>0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Cache cache = (Cache) o;
+
+        return id == cache.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
+
+    @Override
+    public String toString() {
+        return "Cache{" +
+                "id=" + id +
+                ", size=" + size +
+                ", videos=" + videos +
+                '}';
     }
 }

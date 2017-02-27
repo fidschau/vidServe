@@ -81,9 +81,13 @@ public class Endpoint {
         return (totalViews/requestDescriptions.size());
     }
 
-    public boolean isVideoInAnyCache(Video video){
+    public boolean isVideoInAnyCache(Video video,ArrayList<Cache>allCaches){
         for (Cache cache:getCaches()){
-          //  if (cache.)
+            System.out.println("Is video in cache:\n");
+            System.out.println(cache.toString());
+            if (allCaches.get(allCaches.indexOf(cache)).addVideo(video))return true;
+
+
         }
 
 
@@ -92,11 +96,24 @@ public class Endpoint {
 
     private ArrayList<Cache> getCaches(){
         ArrayList<Cache> caches= new ArrayList<>();
-       for (Cache cache:latencyTable.keySet()){
+       for (Cache cache:getSortedCachesByLatency().keySet()){
            caches.add(cache);
        }
 
         return caches;
+    }
+
+    public String latencyTableString(){
+        StringBuilder stringBuilder= new StringBuilder("Latency table: ");
+
+        for (Cache cache:getSortedCachesByLatency().keySet()){
+            stringBuilder.append(" Latency: ");
+            stringBuilder.append(latencyTable.get(cache));
+            stringBuilder.append(" cacheID: ");
+            stringBuilder.append(cache.id);
+        }
+
+        return stringBuilder.toString();
     }
 
 
@@ -105,7 +122,7 @@ public class Endpoint {
         return "Endpoint{" +
                 "id=" + id +
                 ", latencyToDataCenter=" + latencyToDataCenter +
-                ", latencyTable=" + latencyTable.toString() +
+                ", latencyTable=" + latencyTableString() +
                 ", requestDescriptions=" + requestDescriptions +
                 ", average video demand= "+getAverageVideoDemand()+
                 '}';
