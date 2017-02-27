@@ -5,12 +5,10 @@ import com.gnac.vidServ.models.Endpoint;
 import com.gnac.vidServ.models.RequestDescription;
 import com.gnac.vidServ.models.Video;
 
-import java.nio.file.Files;
 import java.util.*;
 
 
 import java.io.*;
-import java.util.stream.Stream;
 
 /**
  * Created by fidelity on 2017/02/23.
@@ -49,11 +47,11 @@ public class Main {
 
     public static void main(String[] args) {
 
-        processVideos("me_at_the_zoo");
+       // processVideos("me_at_the_zoo");
 
-        processVideos("trending_today");
+        //processVideos("trending_today");
         processVideos("videos_worth_spreading");
-        processVideos("kittens");
+       // processVideos("kittens");
 
     }
 
@@ -130,7 +128,7 @@ public class Main {
             }
             System.out.println(videos.toString());
             System.out.println(endpoints.toString());
-            Collections.sort(endpoints, (o1, o2) -> Float.compare(o2.getAverageVideoDemand(),o1.getAverageVideoDemand()));
+            Collections.sort(endpoints, (o1, o2) -> Float.compare(o2.getEndpointPriority(),o1.getEndpointPriority()));
             System.out.println("Sorted: "+endpoints.toString());
 
 
@@ -139,12 +137,14 @@ public class Main {
                 for (RequestDescription requestDescription:endpoint.getRequestDescriptions()){
                     Video video = videos.get(videos.indexOf(requestDescription.getVideo()));
                     if (!endpoint.isVideoInAnyCache(video,allCaches)){
+                        System.out.println("I get here");
                         for (Cache cache:endpoint.getSortedCachesByLatency().keySet()){
+                            System.out.println("and here");
                             Cache globalCache=allCaches.get(allCaches.indexOf(cache));
                             if (globalCache.addVideo(video)){
                                 allCaches.remove(cache);
-                                allCaches.add(cache);
-                                return;
+                                allCaches.add(globalCache);
+                                break;
                             }
                         }
                     }
@@ -153,6 +153,12 @@ public class Main {
             }
 
             String submissionString = createSubmissionString(allCaches);
+            int totalFreeSpace=0;
+            for (Cache cache:allCaches){
+               totalFreeSpace+=cache.getFreeSpace();
+
+            }
+            System.out.println("Total free space = "+totalFreeSpace);
             createSubmissionFile(fileName,submissionString);
 
         }

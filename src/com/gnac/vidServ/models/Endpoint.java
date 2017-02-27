@@ -39,7 +39,8 @@ public class Endpoint {
 
     public  ArrayList<RequestDescription> getRequestDescriptions(){
         Collections.sort(requestDescriptions, (o1, o2) -> o2.getViewers()-o1.getViewers());
-
+        System.out.println("sorted erquest descritptions");
+        System.out.println(requestDescriptions.toString());
         return requestDescriptions;
     }
 
@@ -61,46 +62,66 @@ public class Endpoint {
     public HashMap<Cache,Integer> getSortedCachesByLatency(){
         List<HashMap.Entry<Cache,Integer>> entryList= new LinkedList<Map.Entry<Cache, Integer>>(latencyTable.entrySet());
 
-        Collections.sort(entryList, Comparator.comparing(o -> (o.getValue())));
+        Collections.sort(entryList, new Comparator<HashMap.Entry<Cache, Integer>>() {
+            @Override
+            public int compare(Map.Entry<Cache, Integer> o1, Map.Entry<Cache, Integer> o2) {
+                return Integer.compare(o1.getValue(),o2.getValue());
+            }
+        });
 
         HashMap<Cache,Integer>  returnHashMap=new HashMap<>();
+
+       // System.out.println("Sorted hashmap");
         for (Map.Entry<Cache,Integer> cacheIntegerEntry:entryList){
+            //System.out.println("\n"+cacheIntegerEntry.getKey()+" latency: "+cacheIntegerEntry.getValue());
             returnHashMap.put(cacheIntegerEntry.getKey(),cacheIntegerEntry.getValue());
         }
 
         return returnHashMap;
     }
 
-    public float getAverageVideoDemand(){
+    public float getEndpointPriority(){
         int totalViews=0;
         for (RequestDescription requestDescription:requestDescriptions){
             totalViews+=requestDescription.getViewers();
         }
 
 
-        return (totalViews/requestDescriptions.size());
+        return (latencyToDataCenter*totalViews/requestDescriptions.size());
     }
 
     public boolean isVideoInAnyCache(Video video,ArrayList<Cache>allCaches){
+
+        boolean toReturn=false;
+        System.out.println("Is video in any cache called");
+        System.out.println(getSortedCachesByLatency().entrySet());
+
         for (Cache cache:getCaches()){
-            System.out.println("Is video in cache:\n");
-            System.out.println(cache.toString());
-            if (allCaches.get(allCaches.indexOf(cache)).addVideo(video))return true;
+           // System.out.println("Is video in cache:\n");
+            //System.out.println(cache.toString());
+            System.out.println("For loop in Is video in any cache called");
+           // System.out.println(cache.toString());
+          //  System.out.println(video.toString());
+            System.out.println(allCaches.get(allCaches.indexOf(cache)).toString());
+            System.out.println("\n"+video.toString());
+            if (allCaches.get(allCaches.indexOf(cache)).hasVideo(video)){
+                System.out.println("video is in cache");
+                toReturn=true;
+                return true;
+            }
+
 
 
         }
 
 
-        return false;
+        return toReturn;
     }
 
-    private ArrayList<Cache> getCaches(){
-        ArrayList<Cache> caches= new ArrayList<>();
-       for (Cache cache:getSortedCachesByLatency().keySet()){
-           caches.add(cache);
-       }
+    private Set<Cache> getCaches(){
 
-        return caches;
+
+        return getSortedCachesByLatency().keySet();
     }
 
     public String latencyTableString(){
@@ -124,7 +145,7 @@ public class Endpoint {
                 ", latencyToDataCenter=" + latencyToDataCenter +
                 ", latencyTable=" + latencyTableString() +
                 ", requestDescriptions=" + requestDescriptions +
-                ", average video demand= "+getAverageVideoDemand()+
+                ", average video demand= "+ getEndpointPriority()+
                 '}';
     }
 }
